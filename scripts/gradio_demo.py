@@ -7,8 +7,8 @@ import argparse
 
 import gradio as gr
 
-from whisper_small import Transcriber
-from whisper_small.audio import to_mono_16k
+from kyrgyz_whisper_small import Transcriber
+from kyrgyz_whisper_small.audio import to_mono_16k
 
 
 def main() -> None:
@@ -30,8 +30,8 @@ def main() -> None:
         rows = [[f"{s.start:.2f}", f"{s.end:.2f}", s.text] for s in res.segments]
         return f"{res.text}\n\n({res.audio_seconds:.1f}s audio in {res.elapsed_seconds:.2f}s on {asr.device})", rows
 
-    with gr.Blocks(title="whisper-small") as ui:
-        gr.Markdown("## whisper-small · Кыргызча кепти текстке айландыруу")
+    with gr.Blocks(title="kyrgyz-whisper-small") as ui:
+        gr.Markdown("## kyrgyz-whisper-small · Кыргызча кепти текстке айландыруу")
         with gr.Row():
             with gr.Column():
                 audio = gr.Audio(sources=["upload", "microphone"], type="numpy", label="Audio")

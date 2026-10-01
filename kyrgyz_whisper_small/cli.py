@@ -8,13 +8,18 @@ from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.progress import track
+from rich.progress import BarColumn, DownloadColumn, Progress, TransferSpeedColumn, track
 from rich.table import Table
 
 from .config import DEFAULT_LANGUAGE, DEFAULT_MODEL_DIR
 
-app = typer.Typer(help="whisper-small: Kyrgyz speech recognition (Whisper-small).", no_args_is_help=True)
+app = typer.Typer(help="kyrgyz-whisper-small: Kyrgyz speech recognition (Whisper-small).", no_args_is_help=True)
 console = Console()
+
+
+class Source(str, Enum):
+    drive = "drive"
+    hub = "hub"
 
 
 class Fmt(str, Enum):
@@ -56,12 +61,21 @@ def _to_srt(result) -> str:
 
 
 @app.command()
-def download(local_dir: Path = typer.Option(DEFAULT_MODEL_DIR, help="Where to store the snapshot.")):
-    """Download the model weights from the Hugging Face Hub."""
-    from .model import download_model
+def download(
+    local_dir: Path = typer.Option(DEFAULT_MODEL_DIR, help="Where to store the model."),
+    source: Source = typer.Option(Source.hub, "--source", "-s", help="hub | drive"),
+):
+    """Download the model weights (~1 GB)."""
+    from .model import download_from_drive, download_from_hub
 
-    with console.status("Downloading model weights (~1 GB) ..."):
-        path = download_model(local_dir)
+    if source is Source.drive:
+        cols = ("{task.description}", BarColumn(), DownloadColumn(), TransferSpeedColumn())
+        with Progress(*cols, console=console) as bar:
+            task = bar.add_task("Google Drive", total=None)
+            path = download_from_drive(local_dir, on_progress=lambda done, total: bar.update(task, completed=done, total=total))
+    else:
+        with console.status("Downloading model weights from the Hugging Face Hub (~1 GB) ..."):
+            path = download_from_hub(local_dir)
     console.print(f"[green]✓[/] weights -> {path}")
 
 
@@ -75,7 +89,7 @@ def info(model: Optional[str] = ModelOpt):
     path = resolve_model_path(model)
     cfg = AutoConfig.from_pretrained(path)
     gen = GenerationConfig.from_pretrained(path)
-    t = Table(title="whisper-small", show_header=False)
+    t = Table(title="kyrgyz-whisper-small", show_header=False)
     rows = {
         "source": path,
         "architecture": cfg.architectures[0],
@@ -85,7 +99,7 @@ def info(model: Optional[str] = ModelOpt):
         "vocab size": cfg.vocab_size,
         "max target tokens": cfg.max_target_positions,
         "task token": "transcribe (forced)",
-        "language token": f"{DEFAULT_LANGUAGE} (no <|ky|> in Whisper; model uses the Kazakh slot)",
+        "language token": f"{DEFAULT_LANGUAGE} (no <|ky|> in Whisper; kk measured best)",
         "has 'ky' token": "<|ky|>" in gen.lang_to_id,
         "best device here": resolve_device(),
     }

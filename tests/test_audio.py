@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-from whisper_small.audio import is_silent, load_audio, save_wav, split_on_silence, to_mono_16k
-from whisper_small.config import SAMPLE_RATE
-from whisper_small.evaluate import normalize, score
+from kyrgyz_whisper_small.audio import is_silent, load_audio, save_wav, split_on_silence, to_mono_16k
+from kyrgyz_whisper_small.config import SAMPLE_RATE
+from kyrgyz_whisper_small.evaluate import normalize, score
 
 SR = SAMPLE_RATE
 

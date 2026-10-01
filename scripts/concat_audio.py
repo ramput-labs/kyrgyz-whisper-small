@@ -8,8 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
-from whisper_small.audio import load_audio, save_wav
-from whisper_small.config import SAMPLE_RATE
+from kyrgyz_whisper_small.audio import load_audio, save_wav
+from kyrgyz_whisper_small.config import SAMPLE_RATE
 
 
 def main() -> None:

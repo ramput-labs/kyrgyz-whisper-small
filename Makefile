@@ -2,7 +2,7 @@ SHELL   := /bin/bash
 PYTHON  ?= $(shell command -v python3.12 || command -v python3)
 VENV    := .venv
 BIN     := $(VENV)/bin
-CLI     := $(BIN)/python -m whisper_small
+CLI     := $(BIN)/python -m kyrgyz_whisper_small
 
 FILE    ?= samples/long.wav
 N       ?= 20
@@ -12,18 +12,20 @@ DTYPE   ?= auto
 LANG_ID ?= kk
 BEAMS   ?= 1
 SECONDS ?= 5
+SOURCE  ?= hub
+REPO    ?= ramput-labs/kyrgyz-whisper-small
 FLEURS  := data/fleurs_ky
 
 COMMON  = --device $(DEVICE) --dtype $(DTYPE)
 
 .DEFAULT_GOAL := help
 .PHONY: help setup install download samples long-sample quickstart info transcribe srt json \
-        detect-lang mic eval bench demo test lint clean clean-all
+        detect-lang mic eval bench demo upload test lint clean clean-all
 
 help: ## Show this help
 	@awk 'BEGIN{FS=":.*##"; printf "\nUsage: make \033[36m<target>\033[0m [VAR=value]\n\n"} \
 	     /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo -e "\nVars: FILE=$(FILE) DEVICE=$(DEVICE) DTYPE=$(DTYPE) LANG_ID=$(LANG_ID) BEAMS=$(BEAMS) N=$(N) SPLIT=$(SPLIT)\n"
+	@echo -e "\nVars: FILE=$(FILE) DEVICE=$(DEVICE) DTYPE=$(DTYPE) LANG_ID=$(LANG_ID) BEAMS=$(BEAMS) N=$(N) SPLIT=$(SPLIT) SOURCE=$(SOURCE)\n"
 
 $(BIN)/python:
 	$(PYTHON) -m venv $(VENV)
@@ -35,8 +37,8 @@ setup: $(BIN)/python ## Create venv and install requirements.txt
 
 install: setup ## Alias for setup
 
-download: ## Download model weights (~1 GB) into ./models
-	$(CLI) download
+download: ## Download model weights (~1 GB) into ./models (SOURCE=hub|drive)
+	$(CLI) download --source $(SOURCE)
 
 samples: ## Fetch N Kyrgyz clips from Google FLEURS (streams, only a few MB)
 	$(BIN)/python -m scripts.fetch_fleurs --split $(SPLIT) -n $(N) --out $(FLEURS)
@@ -74,6 +76,9 @@ bench: ## Speed comparison cpu/mps × fp32/fp16 on FILE
 demo: ## Gradio web UI (upload or record in the browser)
 	$(BIN)/pip install -q gradio
 	$(BIN)/python -m scripts.gradio_demo
+
+upload: ## Upload ./models/kyrgyz-whisper-small + model card to REPO (needs `hf auth login`)
+	$(BIN)/python -m scripts.upload_model --repo $(REPO)
 
 test: ## Run unit tests (fast; model tests auto-skip if weights missing)
 	$(BIN)/pytest -q
