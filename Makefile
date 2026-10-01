@@ -13,7 +13,6 @@ DTYPE   ?= auto
 LANG_ID ?= kk
 BEAMS   ?= 1
 SECONDS ?= 5
-SOURCE  ?= hub
 REPO    ?= ramput-labs/kyrgyz-whisper-small
 ARGS    ?=
 FLEURS  := data/fleurs_ky
@@ -29,7 +28,7 @@ TRANSCRIBE = $(CLI) transcribe "$(FILE)" $(DECODE)
 help: ## Show this help
 	@awk 'BEGIN{FS=":.*##"; printf "\nUsage: make \033[36m<target>\033[0m [VAR=value]\n\n"} \
 	     /^[a-zA-Z_-]+:.*##/ {printf "  \033[36m%-13s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-	@echo -e "\nVars: FILE=$(FILE) DEVICE=$(DEVICE) DTYPE=$(DTYPE) LANG_ID=$(LANG_ID) BEAMS=$(BEAMS) N=$(N) SPLIT=$(SPLIT) SOURCE=$(SOURCE)\n"
+	@echo -e "\nVars: FILE=$(FILE) DEVICE=$(DEVICE) DTYPE=$(DTYPE) LANG_ID=$(LANG_ID) BEAMS=$(BEAMS) N=$(N) SPLIT=$(SPLIT) REPO=$(REPO)\n"
 
 $(PY):
 	$(PYTHON) -m venv $(VENV)
@@ -41,8 +40,8 @@ setup: $(PY) ## Create venv and install requirements.txt
 
 install: setup ## Alias for setup
 
-download: ## Download model weights (~1 GB) into ./models (SOURCE=hub|drive)
-	$(CLI) download --source $(SOURCE)
+download: ## Download model weights (~1 GB) from REPO on Hugging Face into ./models
+	$(CLI) download --repo $(REPO)
 
 samples: ## Fetch N Kyrgyz clips from Google FLEURS (streams, only a few MB)
 	$(PY) -m scripts.fetch_fleurs --split $(SPLIT) -n $(N) --out $(FLEURS)

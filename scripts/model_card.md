@@ -4,7 +4,7 @@ language:
 license: apache-2.0
 library_name: transformers
 pipeline_tag: automatic-speech-recognition
-base_model: openai/whisper-small
+base_model: the-cramer-project/AkylAI-STT-small
 tags:
   - whisper
   - kyrgyz
@@ -35,6 +35,11 @@ model-index:
 
 Whisper-small for Kyrgyz speech recognition (кыргызча кепти текстке айландыруу).
 
+The weights are [the-cramer-project/AkylAI-STT-small](https://huggingface.co/the-cramer-project/AkylAI-STT-small)
+by The Cramer Project, itself a Kyrgyz fine-tune of [openai/whisper-small](https://huggingface.co/openai/whisper-small)
+by OpenAI. We did not retrain them; we re-saved them and added a generation setup for Kyrgyz
+(`language="kk"`) and evaluation results.
+
 ## Usage
 
 ```python
@@ -58,3 +63,8 @@ make quickstart
 
 FLEURS Kyrgyz dev, 100 clips without digits: **WER 16.3% / CER 4.5%**.
 Numbers are written as words ("жети миң"), so references with digits score lower.
+
+## License
+
+Apache-2.0 (see `LICENSE`), as inherited from AkylAI-STT-small and Whisper.
+The toolkit code on GitHub is MIT.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Web UI: upload or record audio in the browser and get Kyrgyz text."""
 
 from __future__ import annotations
@@ -6,13 +5,14 @@ from __future__ import annotations
 import argparse
 
 import gradio as gr
+import numpy as np
 
 from kyrgyz_whisper_small import Transcriber
 from kyrgyz_whisper_small.audio import to_mono_16k
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--device", default="auto")
     ap.add_argument("--share", action="store_true", help="Create a public gradio.live link.")
     ap.add_argument("--open", action="store_true", help="Open the UI in the default browser.")
@@ -24,9 +24,9 @@ def main() -> None:
         if audio is None:
             return "", []
         sr, data = audio
-        audio_f = data.astype("float32")
+        audio_f = data.astype(np.float32)
         if data.dtype.kind == "i":
-            audio_f /= 32768.0
+            audio_f /= np.iinfo(data.dtype).max + 1
         res = asr.transcribe(to_mono_16k(audio_f, sr), language=language, num_beams=int(beams))
         rows = [[f"{s.start:.2f}", f"{s.end:.2f}", s.text] for s in res.segments]
         return f"{res.text}\n\n({res.audio_seconds:.1f}s audio in {res.elapsed_seconds:.2f}s on {asr.device})", rows

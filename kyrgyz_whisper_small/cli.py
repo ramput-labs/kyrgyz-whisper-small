@@ -2,24 +2,20 @@ from __future__ import annotations
 
 import json
 import time
+from dataclasses import asdict
 from enum import Enum
 from pathlib import Path
 from typing import Optional
 
 import typer
 from rich.console import Console
-from rich.progress import BarColumn, DownloadColumn, Progress, TransferSpeedColumn, track
+from rich.progress import track
 from rich.table import Table
 
-from .config import DEFAULT_LANGUAGE, DEFAULT_MODEL_DIR
+from .config import DEFAULT_LANGUAGE, DEFAULT_MODEL_DIR, MODEL_ID, SAMPLE_RATE
 
 app = typer.Typer(help="kyrgyz-whisper-small: Kyrgyz speech recognition (Whisper-small).", no_args_is_help=True)
 console = Console()
-
-
-class Source(str, Enum):
-    drive = "drive"
-    hub = "hub"
 
 
 class Fmt(str, Enum):
@@ -63,19 +59,13 @@ def _to_srt(result) -> str:
 @app.command()
 def download(
     local_dir: Path = typer.Option(DEFAULT_MODEL_DIR, help="Where to store the model."),
-    source: Source = typer.Option(Source.hub, "--source", "-s", help="hub | drive"),
+    repo: str = typer.Option(MODEL_ID, help="Hugging Face model repo."),
 ):
-    """Download the model weights (~1 GB)."""
-    from .model import download_from_drive, download_from_hub
+    """Download the model weights (~1 GB) from the Hugging Face Hub."""
+    from .model import download as fetch
 
-    if source is Source.drive:
-        cols = ("{task.description}", BarColumn(), DownloadColumn(), TransferSpeedColumn())
-        with Progress(*cols, console=console) as bar:
-            task = bar.add_task("Google Drive", total=None)
-            path = download_from_drive(local_dir, on_progress=lambda done, total: bar.update(task, completed=done, total=total))
-    else:
-        with console.status("Downloading model weights from the Hugging Face Hub (~1 GB) ..."):
-            path = download_from_hub(local_dir)
+    with console.status(f"Downloading {repo} from the Hugging Face Hub (~1 GB) ..."):
+        path = fetch(local_dir, repo)
     console.print(f"[green]✓[/] weights -> {path}")
 
 
@@ -132,7 +122,7 @@ def transcribe(
                     "audio_seconds": round(res.audio_seconds, 2),
                     "elapsed_seconds": round(res.elapsed_seconds, 3),
                     "rtf": round(res.rtf, 4),
-                    "segments": [s.__dict__ for s in res.segments],
+                    "segments": [asdict(s) for s in res.segments],
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -264,7 +254,8 @@ def bench(
     from .transcriber import Transcriber
 
     audio = load_audio(file)
-    t = Table(title=f"{file.name} ({len(audio) / 16000:.1f}s)")
+    seconds = len(audio) / SAMPLE_RATE
+    t = Table(title=f"{file.name} ({seconds:.1f}s)")
     for col in ("device", "dtype", "load s", "best s", "RTF", "text"):
         t.add_column(col)
     for dev in devices.split(","):
@@ -278,12 +269,8 @@ def bench(
                 asr.transcribe(audio)
                 best = min(asr.transcribe(audio).elapsed_seconds for _ in range(runs))
                 text = asr.transcribe(audio).text
-                t.add_row(dev, dt, f"{load_s:.1f}", f"{best:.2f}", f"{best / (len(audio) / 16000):.3f}", text[:40] + "…")
+                t.add_row(dev, dt, f"{load_s:.1f}", f"{best:.2f}", f"{best / seconds:.3f}", text[:40] + "…")
                 del asr
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:
                 t.add_row(dev, dt, "-", "-", "-", f"[red]{type(e).__name__}: {e}"[:60])
     console.print(t)
-
-
-if __name__ == "__main__":
-    app()

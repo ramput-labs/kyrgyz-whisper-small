@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Stream N Kyrgyz clips from Google FLEURS and write a TSV manifest."""
 
 from __future__ import annotations

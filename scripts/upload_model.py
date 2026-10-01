@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Upload the local model folder and model card to the Hugging Face Hub."""
 
 from __future__ import annotations
@@ -12,6 +11,7 @@ from huggingface_hub.errors import LocalTokenNotFoundError
 from kyrgyz_whisper_small.config import DEFAULT_MODEL_DIR, MODEL_ID
 
 CARD = Path(__file__).with_name("model_card.md")
+WEIGHTS_LICENSE = Path(__file__).with_name("weights_license.txt")
 
 
 def main() -> None:
@@ -22,7 +22,7 @@ def main() -> None:
     args = ap.parse_args()
 
     if not (args.model_dir / "model.safetensors").exists():
-        raise SystemExit(f"No model in {args.model_dir}. Run `make download SOURCE=drive` first.")
+        raise SystemExit(f"No model in {args.model_dir}. Run `make download` first.")
 
     api = HfApi()
     try:
@@ -42,6 +42,12 @@ def main() -> None:
         path_or_fileobj=CARD,
         path_in_repo="README.md",
         commit_message="Update model card",
+    )
+    api.upload_file(
+        repo_id=args.repo,
+        path_or_fileobj=WEIGHTS_LICENSE,
+        path_in_repo="LICENSE",
+        commit_message="Add Apache-2.0 license",
     )
     print(f"Done: https://huggingface.co/{args.repo}")
 

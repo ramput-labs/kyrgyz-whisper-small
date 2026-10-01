@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Concatenate audio files with a short pause between them into one 16 kHz wav."""
 
 from __future__ import annotations
