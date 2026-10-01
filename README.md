@@ -45,7 +45,7 @@ The model downloads from Hugging Face: [ramput-labs/kyrgyz-whisper-small](https:
 | Subtitles (.srt) | `make srt FILE=audio.wav` | `python -m kyrgyz_whisper_small transcribe audio.wav -f srt -o out` |
 | JSON output | `make json FILE=audio.wav` | `python -m kyrgyz_whisper_small transcribe audio.wav -f json -o out` |
 | Microphone | `make mic` | `python -m kyrgyz_whisper_small mic --loop` |
-| Web demo | `make demo` | `pip install gradio && python -m scripts.gradio_demo` |
+| Web demo | `make demo` | `pip install gradio && python -m scripts.gradio_demo --open` |
 | Accuracy (WER/CER) | `make eval` | `python -m kyrgyz_whisper_small evaluate data/fleurs_ky/manifest.tsv` |
 | Speed benchmark | `make bench FILE=audio.wav` | `python -m kyrgyz_whisper_small bench audio.wav` |
 | Tests | `make test` | `pytest -q` |
@@ -116,7 +116,7 @@ python -m scripts.fetch_fleurs -n 20 --out data/fleurs_ky # кыргызча ү�
 | Субтитр (.srt) | `make srt FILE=audio.wav` | `python -m kyrgyz_whisper_small transcribe audio.wav -f srt -o out` |
 | JSON | `make json FILE=audio.wav` | `python -m kyrgyz_whisper_small transcribe audio.wav -f json -o out` |
 | Микрофон | `make mic` | `python -m kyrgyz_whisper_small mic --loop` |
-| Веб-демо | `make demo` | `pip install gradio && python -m scripts.gradio_demo` |
+| Веб-демо | `make demo` | `pip install gradio && python -m scripts.gradio_demo --open` |
 | Тактык (WER/CER) | `make eval` | `python -m kyrgyz_whisper_small evaluate data/fleurs_ky/manifest.tsv` |
 | Ылдамдык | `make bench FILE=audio.wav` | `python -m kyrgyz_whisper_small bench audio.wav` |
 | Тесттер | `make test` | `pytest -q` |

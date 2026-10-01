@@ -15,6 +15,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--device", default="auto")
     ap.add_argument("--share", action="store_true", help="Create a public gradio.live link.")
+    ap.add_argument("--open", action="store_true", help="Open the UI in the default browser.")
     args = ap.parse_args()
 
     asr = Transcriber(device=args.device)
@@ -43,7 +44,7 @@ def main() -> None:
                 segs = gr.Dataframe(headers=["start", "end", "text"], label="Segments", wrap=True)
         btn.click(run, [audio, language, beams], [text, segs])
 
-    ui.launch(share=args.share)
+    ui.launch(share=args.share, inbrowser=args.open)
 
 
 if __name__ == "__main__":
