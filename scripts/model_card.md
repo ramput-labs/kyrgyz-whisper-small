@@ -33,14 +33,17 @@ model-index:
 
 # kyrgyz-whisper-small
 
-Whisper-small for Kyrgyz speech recognition (кыргызча кепти текстке айландыруу).
+Kyrgyz speech recognition (кыргызча кепти текстке айландыруу) with Whisper-small.
 
-The weights are [the-cramer-project/AkylAI-STT-small](https://huggingface.co/the-cramer-project/AkylAI-STT-small)
-by The Cramer Project, itself a Kyrgyz fine-tune of [openai/whisper-small](https://huggingface.co/openai/whisper-small)
-by OpenAI. We did not retrain them; we re-saved them and added a generation setup for Kyrgyz
-(`language="kk"`) and evaluation results.
+> ### 🛠️ Toolkit: [github.com/ramput-labs/kyrgyz-whisper-small](https://github.com/ramput-labs/kyrgyz-whisper-small)
+> CLI, Python API, long-audio transcription, microphone input, web demo and WER/CER evaluation.
+>
+> ```bash
+> git clone https://github.com/ramput-labs/kyrgyz-whisper-small.git
+> cd kyrgyz-whisper-small && make quickstart
+> ```
 
-## Usage
+## Usage with transformers
 
 ```python
 import soundfile as sf
@@ -51,20 +54,22 @@ audio, sr = sf.read("audio.wav", dtype="float32")
 print(asr({"raw": audio, "sampling_rate": sr}, generate_kwargs={"language": "kk", "task": "transcribe"})["text"])
 ```
 
-Whisper has no Kyrgyz token, so pass `language="kk"`. It gives the best accuracy.
-For audio longer than 30 s, CLI, microphone and web demo, use the
-[kyrgyz-whisper-small](https://github.com/ramput-labs/kyrgyz-whisper-small) toolkit:
-
-```bash
-make quickstart
-```
+Whisper has no Kyrgyz token, so pass `language="kk"`; it gives the best accuracy.
+This snippet handles clips up to 30 s. For longer audio, use the [toolkit](https://github.com/ramput-labs/kyrgyz-whisper-small).
 
 ## Results
 
 FLEURS Kyrgyz dev, 100 clips without digits: **WER 16.3% / CER 4.5%**.
 Numbers are written as words ("жети миң"), so references with digits score lower.
 
+## Credits
+
+- Weights: [the-cramer-project/AkylAI-STT-small](https://huggingface.co/the-cramer-project/AkylAI-STT-small)
+  by The Cramer Project, a Kyrgyz fine-tune of [openai/whisper-small](https://huggingface.co/openai/whisper-small) by OpenAI.
+  We did not retrain them; we re-saved them with a Kyrgyz generation setup (`language="kk"`) and added evaluation results.
+- Evaluation audio: [google/fleurs](https://huggingface.co/datasets/google/fleurs) (CC-BY-4.0).
+
 ## License
 
-Apache-2.0 (see `LICENSE`), as inherited from AkylAI-STT-small and Whisper.
-The toolkit code on GitHub is MIT.
+Apache-2.0 (see `LICENSE`), inherited from AkylAI-STT-small and Whisper.
+The [toolkit code](https://github.com/ramput-labs/kyrgyz-whisper-small) is MIT.
