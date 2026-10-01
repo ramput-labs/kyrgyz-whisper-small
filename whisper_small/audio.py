@@ -50,7 +50,7 @@ def record(seconds: float, device: int | str | None = None) -> np.ndarray:
     try:
         import sounddevice as sd
     except ImportError as e:  # pragma: no cover
-        raise RuntimeError("Microphone support needs `pip install -e '.[mic]'`") from e
+        raise RuntimeError("Microphone support needs `pip install sounddevice`") from e
     frames = int(seconds * SAMPLE_RATE)
     audio = sd.rec(frames, samplerate=SAMPLE_RATE, channels=1, dtype="float32", device=device)
     sd.wait()

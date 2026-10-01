@@ -26,22 +26,24 @@ make help           # list all commands
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[mic,dev]"
-whisper-small download                                    # model weights (~1 GB)
-python scripts/fetch_fleurs.py -n 20 --out data/fleurs_ky # sample Kyrgyz clips
+pip install -r requirements.txt
+python -m whisper_small download                          # model weights (~1 GB)
+python -m scripts.fetch_fleurs -n 20 --out data/fleurs_ky # sample Kyrgyz clips
 ```
+
+Run all commands from the project root.
 
 ### Examples
 
 | Task | Make | CLI |
 |---|---|---|
-| Transcribe a file | `make transcribe FILE=audio.wav` | `whisper-small transcribe audio.wav -t` |
-| Subtitles (.srt) | `make srt FILE=audio.wav` | `whisper-small transcribe audio.wav -f srt -o out` |
-| JSON output | `make json FILE=audio.wav` | `whisper-small transcribe audio.wav -f json -o out` |
-| Microphone | `make mic` | `whisper-small mic --loop` |
-| Web demo | `make demo` | `pip install -e ".[demo]" && python scripts/gradio_demo.py` |
-| Accuracy (WER/CER) | `make eval` | `whisper-small evaluate data/fleurs_ky/manifest.tsv` |
-| Speed benchmark | `make bench FILE=audio.wav` | `whisper-small bench audio.wav` |
+| Transcribe a file | `make transcribe FILE=audio.wav` | `python -m whisper_small transcribe audio.wav -t` |
+| Subtitles (.srt) | `make srt FILE=audio.wav` | `python -m whisper_small transcribe audio.wav -f srt -o out` |
+| JSON output | `make json FILE=audio.wav` | `python -m whisper_small transcribe audio.wav -f json -o out` |
+| Microphone | `make mic` | `python -m whisper_small mic --loop` |
+| Web demo | `make demo` | `pip install gradio && python -m scripts.gradio_demo` |
+| Accuracy (WER/CER) | `make eval` | `python -m whisper_small evaluate data/fleurs_ky/manifest.tsv` |
+| Speed benchmark | `make bench FILE=audio.wav` | `python -m whisper_small bench audio.wav` |
 | Tests | `make test` | `pytest -q` |
 
 Make variables: `FILE`, `DEVICE` (auto/cpu/mps/cuda), `DTYPE` (auto/fp32/fp16), `BEAMS`, `LANG_ID`, `N`, `SECONDS`.
@@ -91,22 +93,24 @@ make help           # бардык буйруктар
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[mic,dev]"
-whisper-small download                                    # модель (~1 GB)
-python scripts/fetch_fleurs.py -n 20 --out data/fleurs_ky # кыргызча үлгү аудиолор
+pip install -r requirements.txt
+python -m whisper_small download                          # модель (~1 GB)
+python -m scripts.fetch_fleurs -n 20 --out data/fleurs_ky # кыргызча үлгү аудиолор
 ```
+
+Бардык буйруктарды долбоордун негизги папкасынан иштетиңиз.
 
 ### Мисалдар
 
 | Эмне кылат | Make | CLI |
 |---|---|---|
-| Файлды текстке айлантуу | `make transcribe FILE=audio.wav` | `whisper-small transcribe audio.wav -t` |
-| Субтитр (.srt) | `make srt FILE=audio.wav` | `whisper-small transcribe audio.wav -f srt -o out` |
-| JSON | `make json FILE=audio.wav` | `whisper-small transcribe audio.wav -f json -o out` |
-| Микрофон | `make mic` | `whisper-small mic --loop` |
-| Веб-демо | `make demo` | `pip install -e ".[demo]" && python scripts/gradio_demo.py` |
-| Тактык (WER/CER) | `make eval` | `whisper-small evaluate data/fleurs_ky/manifest.tsv` |
-| Ылдамдык | `make bench FILE=audio.wav` | `whisper-small bench audio.wav` |
+| Файлды текстке айлантуу | `make transcribe FILE=audio.wav` | `python -m whisper_small transcribe audio.wav -t` |
+| Субтитр (.srt) | `make srt FILE=audio.wav` | `python -m whisper_small transcribe audio.wav -f srt -o out` |
+| JSON | `make json FILE=audio.wav` | `python -m whisper_small transcribe audio.wav -f json -o out` |
+| Микрофон | `make mic` | `python -m whisper_small mic --loop` |
+| Веб-демо | `make demo` | `pip install gradio && python -m scripts.gradio_demo` |
+| Тактык (WER/CER) | `make eval` | `python -m whisper_small evaluate data/fleurs_ky/manifest.tsv` |
+| Ылдамдык | `make bench FILE=audio.wav` | `python -m whisper_small bench audio.wav` |
 | Тесттер | `make test` | `pytest -q` |
 
 Make өзгөрмөлөрү: `FILE`, `DEVICE` (auto/cpu/mps/cuda), `DTYPE` (auto/fp32/fp16), `BEAMS`, `LANG_ID`, `N`, `SECONDS`.

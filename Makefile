@@ -2,7 +2,7 @@ SHELL   := /bin/bash
 PYTHON  ?= $(shell command -v python3.12 || command -v python3)
 VENV    := .venv
 BIN     := $(VENV)/bin
-CLI   := $(BIN)/whisper-small
+CLI     := $(BIN)/python -m whisper_small
 
 FILE    ?= samples/long.wav
 N       ?= 20
@@ -29,8 +29,8 @@ $(BIN)/python:
 	$(PYTHON) -m venv $(VENV)
 	$(BIN)/pip install -q --upgrade pip
 
-setup: $(BIN)/python ## Create venv and install package + mic/dev extras
-	$(BIN)/pip install -q -e ".[mic,dev]"
+setup: $(BIN)/python ## Create venv and install requirements.txt
+	$(BIN)/pip install -q -r requirements.txt
 	@echo "✓ ready — try: make quickstart"
 
 install: setup ## Alias for setup
@@ -39,10 +39,10 @@ download: ## Download model weights (~1 GB) into ./models
 	$(CLI) download
 
 samples: ## Fetch N Kyrgyz clips from Google FLEURS (streams, only a few MB)
-	$(BIN)/python scripts/fetch_fleurs.py --split $(SPLIT) -n $(N) --out $(FLEURS)
+	$(BIN)/python -m scripts.fetch_fleurs --split $(SPLIT) -n $(N) --out $(FLEURS)
 
 long-sample: ## Glue the first 10 FLEURS clips into a ~2 min file (samples/long.wav)
-	$(BIN)/python scripts/concat_audio.py $$(ls $(FLEURS)/wavs/*.wav | head -10) -o samples/long.wav
+	$(BIN)/python -m scripts.concat_audio $$(ls $(FLEURS)/wavs/*.wav | head -10) -o samples/long.wav
 
 quickstart: setup download samples long-sample ## Everything: setup → model → data → first transcript
 	$(CLI) transcribe samples/long.wav -t $(COMMON)
@@ -72,14 +72,14 @@ bench: ## Speed comparison cpu/mps × fp32/fp16 on FILE
 	$(CLI) bench "$(FILE)"
 
 demo: ## Gradio web UI (upload or record in the browser)
-	$(BIN)/pip install -q -e ".[demo]"
-	$(BIN)/python scripts/gradio_demo.py
+	$(BIN)/pip install -q gradio
+	$(BIN)/python -m scripts.gradio_demo
 
 test: ## Run unit tests (fast; model tests auto-skip if weights missing)
 	$(BIN)/pytest -q
 
 clean: ## Remove outputs and caches (keeps model + data)
-	rm -rf out .pytest_cache **/__pycache__ src/*.egg-info
+	rm -rf out .pytest_cache **/__pycache__
 
 clean-all: clean ## Also remove venv, model weights and downloaded data
 	rm -rf $(VENV) models data samples

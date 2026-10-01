@@ -9,7 +9,7 @@ CHUNK_SECONDS = 30
 # Whisper has no <|ky|> token; the model is trained under the Kazakh one.
 DEFAULT_LANGUAGE = "kk"
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = Path(os.environ.get("WHISPER_SMALL_MODELS_DIR", PROJECT_ROOT / "models"))
 DEFAULT_MODEL_DIR = MODELS_DIR / "whisper-small-ky"
 DATA_DIR = PROJECT_ROOT / "data"

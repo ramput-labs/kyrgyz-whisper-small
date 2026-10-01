@@ -172,7 +172,7 @@ def mic(
     beams: int = BeamsOpt,
     language: str = LangOpt,
 ):
-    """Record from the microphone and transcribe (needs the `mic` extra)."""
+    """Record from the microphone and transcribe (needs sounddevice)."""
     from .audio import record, save_wav
 
     asr = _load(model, device, dtype)
