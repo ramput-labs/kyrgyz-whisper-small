@@ -1,5 +1,3 @@
-"""`kyasr` command-line interface."""
-
 from __future__ import annotations
 
 import json
@@ -15,7 +13,7 @@ from rich.table import Table
 
 from .config import DEFAULT_LANGUAGE, DEFAULT_MODEL_DIR
 
-app = typer.Typer(help="kyrgyz-asr: Kyrgyz speech recognition (Whisper-small).", no_args_is_help=True)
+app = typer.Typer(help="whisper-small: Kyrgyz speech recognition (Whisper-small).", no_args_is_help=True)
 console = Console()
 
 
@@ -25,12 +23,11 @@ class Fmt(str, Enum):
     srt = "srt"
 
 
-# Shared options -------------------------------------------------------------------------------
 ModelOpt = typer.Option(None, "--model", "-m", help="Local dir or Hub id (default: ./models snapshot, else Hub).")
 DeviceOpt = typer.Option("auto", "--device", "-d", help="auto | mps | cuda | cpu")
 DtypeOpt = typer.Option("auto", "--dtype", help="auto | fp32 | fp16 | bf16")
 BeamsOpt = typer.Option(1, "--beams", "-b", help="Beam size (1 = greedy, fastest).")
-LangOpt = typer.Option(DEFAULT_LANGUAGE, "--language", "-l", help="Whisper language token. 'kk' is what the fine-tune uses; 'auto' lets the model pick.")
+LangOpt = typer.Option(DEFAULT_LANGUAGE, "--language", "-l", help="Whisper language token. 'kk' (default) works best; 'auto' lets the model pick.")
 
 
 def _load(model, device, dtype):
@@ -58,7 +55,6 @@ def _to_srt(result) -> str:
     return "\n".join(lines)
 
 
-# Commands -------------------------------------------------------------------------------------
 @app.command()
 def download(local_dir: Path = typer.Option(DEFAULT_MODEL_DIR, help="Where to store the snapshot.")):
     """Download the model weights from the Hugging Face Hub."""
@@ -79,7 +75,7 @@ def info(model: Optional[str] = ModelOpt):
     path = resolve_model_path(model)
     cfg = AutoConfig.from_pretrained(path)
     gen = GenerationConfig.from_pretrained(path)
-    t = Table(title="kyrgyz-asr model", show_header=False)
+    t = Table(title="whisper-small", show_header=False)
     rows = {
         "source": path,
         "architecture": cfg.architectures[0],
@@ -89,7 +85,7 @@ def info(model: Optional[str] = ModelOpt):
         "vocab size": cfg.vocab_size,
         "max target tokens": cfg.max_target_positions,
         "task token": "transcribe (forced)",
-        "language token": f"{DEFAULT_LANGUAGE} (no <|ky|> in Whisper; fine-tune uses Kazakh slot)",
+        "language token": f"{DEFAULT_LANGUAGE} (no <|ky|> in Whisper; model uses the Kazakh slot)",
         "has 'ky' token": "<|ky|>" in gen.lang_to_id,
         "best device here": resolve_device(),
     }
@@ -154,7 +150,7 @@ def detect_lang(
     device: str = DeviceOpt,
     dtype: str = DtypeOpt,
 ):
-    """Show which Whisper language tokens the fine-tuned model believes it hears."""
+    """Show which Whisper language tokens the model believes it hears."""
     asr = _load(model, device, dtype)
     for f in files:
         t = Table(title=f.name)
@@ -260,17 +256,17 @@ def bench(
     for dev in devices.split(","):
         for dt in dtypes.split(","):
             if dev == "cpu" and dt == "fp16":
-                continue  # fp16 matmuls on CPU are very slow, not a useful data point
+                continue
             try:
                 t0 = time.perf_counter()
                 asr = Transcriber(model=model, device=dev, dtype=dt)
                 load_s = time.perf_counter() - t0
-                asr.transcribe(audio)  # warm-up
+                asr.transcribe(audio)
                 best = min(asr.transcribe(audio).elapsed_seconds for _ in range(runs))
                 text = asr.transcribe(audio).text
                 t.add_row(dev, dt, f"{load_s:.1f}", f"{best:.2f}", f"{best / (len(audio) / 16000):.3f}", text[:40] + "…")
                 del asr
-            except Exception as e:  # noqa: BLE001 - keep benchmarking other combos
+            except Exception as e:  # noqa: BLE001
                 t.add_row(dev, dt, "-", "-", "-", f"[red]{type(e).__name__}: {e}"[:60])
     console.print(t)
 

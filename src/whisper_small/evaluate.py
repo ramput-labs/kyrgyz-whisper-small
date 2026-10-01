@@ -1,5 +1,3 @@
-"""WER / CER evaluation over a TSV manifest (``path<TAB>reference``)."""
-
 from __future__ import annotations
 
 import csv
@@ -15,7 +13,6 @@ _SPACES = re.compile(r"\s+")
 
 
 def normalize(text: str) -> str:
-    """Lowercase, drop punctuation, collapse whitespace (Kyrgyz letters ң ө ү are kept)."""
     text = unicodedata.normalize("NFC", text).lower().replace("ё", "е")
     text = _PUNCT.sub(" ", text)
     return _SPACES.sub(" ", text).strip()
@@ -34,13 +31,11 @@ def read_manifest(path: str | Path) -> list[Utterance]:
         rows = list(csv.reader(f, delimiter="\t"))
     if rows and rows[0][:2] == ["path", "text"]:
         rows = rows[1:]
-    # Audio paths are resolved relative to the manifest file.
     return [Utterance(path=(path.parent / r[0]).resolve(), reference=r[1]) for r in rows if r]
 
 
 def has_digits(text: str) -> bool:
-    """The model writes numbers as words (жети миң), FLEURS references use digits (7000),
-    so utterances with digits are penalised for a formatting difference, not a recognition error."""
+    # The model spells numbers out while FLEURS uses digits, which inflates WER.
     return any(ch.isdigit() for ch in text)
 
 

@@ -1,5 +1,3 @@
-"""kyrgyz-asr: Kyrgyz speech recognition."""
-
 from .config import MODEL_ID
 from .transcriber import Result, Segment, Transcriber
 

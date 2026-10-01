@@ -1,8 +1,5 @@
 #!/usr/bin/env python
-"""Tiny web UI: upload a file or record in the browser, get Kyrgyz text + segments.
-
-    make demo            # or: python scripts/gradio_demo.py --share
-"""
+"""Web UI: upload or record audio in the browser and get Kyrgyz text."""
 
 from __future__ import annotations
 
@@ -10,8 +7,8 @@ import argparse
 
 import gradio as gr
 
-from kyrgyz_asr import Transcriber
-from kyrgyz_asr.audio import to_mono_16k
+from whisper_small import Transcriber
+from whisper_small.audio import to_mono_16k
 
 
 def main() -> None:
@@ -27,14 +24,14 @@ def main() -> None:
             return "", []
         sr, data = audio
         audio_f = data.astype("float32")
-        if data.dtype.kind == "i":  # gradio hands back int16 PCM
+        if data.dtype.kind == "i":
             audio_f /= 32768.0
         res = asr.transcribe(to_mono_16k(audio_f, sr), language=language, num_beams=int(beams))
         rows = [[f"{s.start:.2f}", f"{s.end:.2f}", s.text] for s in res.segments]
         return f"{res.text}\n\n({res.audio_seconds:.1f}s audio in {res.elapsed_seconds:.2f}s on {asr.device})", rows
 
-    with gr.Blocks(title="kyrgyz-asr") as ui:
-        gr.Markdown("## kyrgyz-asr · Кыргызча кепти текстке айландыруу")
+    with gr.Blocks(title="whisper-small") as ui:
+        gr.Markdown("## whisper-small · Кыргызча кепти текстке айландыруу")
         with gr.Row():
             with gr.Column():
                 audio = gr.Audio(sources=["upload", "microphone"], type="numpy", label="Audio")

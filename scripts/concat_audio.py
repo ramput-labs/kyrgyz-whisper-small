@@ -1,10 +1,5 @@
 #!/usr/bin/env python
-"""Concatenate audio files (with a short pause between them) into one long 16 kHz wav.
-
-Handy for testing long-form (>30 s) chunked transcription and timestamps:
-
-    python scripts/concat_audio.py data/fleurs_ky/wavs/*.wav -o samples/long.wav
-"""
+"""Concatenate audio files with a short pause between them into one 16 kHz wav."""
 
 from __future__ import annotations
 
@@ -13,8 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
-from kyrgyz_asr.audio import load_audio, save_wav
-from kyrgyz_asr.config import SAMPLE_RATE
+from whisper_small.audio import load_audio, save_wav
+from whisper_small.config import SAMPLE_RATE
 
 
 def main() -> None:

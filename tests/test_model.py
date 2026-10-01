@@ -1,11 +1,9 @@
-"""End-to-end checks against the real model; skipped until `make download samples` has run."""
-
 from pathlib import Path
 
 import pytest
 
-from kyrgyz_asr.config import DEFAULT_MODEL_DIR, PROJECT_ROOT
-from kyrgyz_asr.evaluate import read_manifest, score
+from whisper_small.config import DEFAULT_MODEL_DIR, PROJECT_ROOT
+from whisper_small.evaluate import read_manifest, score
 
 MANIFEST = PROJECT_ROOT / "data/fleurs_ky/manifest.tsv"
 
@@ -17,7 +15,7 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def asr():
-    from kyrgyz_asr import Transcriber
+    from whisper_small import Transcriber
 
     return Transcriber()
 

@@ -1,10 +1,3 @@
-"""High-level transcription API.
-
-    from kyrgyz_asr import Transcriber
-    asr = Transcriber()
-    print(asr.transcribe("speech.wav").text)
-"""
-
 from __future__ import annotations
 
 import time
@@ -35,7 +28,6 @@ class Result:
 
     @property
     def rtf(self) -> float:
-        """Real-time factor: processing time / audio duration (lower is faster)."""
         return self.elapsed_seconds / max(self.audio_seconds, 1e-9)
 
 
@@ -70,14 +62,7 @@ class Transcriber:
         num_beams: int = 1,
         max_new_tokens: int = 440,
     ) -> Result:
-        """Transcribe a file path or a 16 kHz mono float32 array of any length.
-
-        Audio longer than ~28 s is cut at pauses into pieces Whisper can see in one window;
-        pieces are decoded as a batch and their boundaries become the segment timestamps.
-
-        ``language``: Whisper has no Kyrgyz token; the fine-tune uses the Kazakh one ("kk", default).
-        Pass None / "auto" to let the model pick, or another code (e.g. "ru") to experiment.
-        """
+        """Transcribe a file path or 16 kHz mono float32 array of any length."""
         if not isinstance(audio, np.ndarray):
             audio = load_audio(audio)
         gen_kwargs: dict = {"task": "transcribe", "num_beams": num_beams, "max_new_tokens": max_new_tokens}
@@ -103,7 +88,6 @@ class Transcriber:
 
     @torch.inference_mode()
     def detect_language(self, audio: str | Path | np.ndarray, top_k: int = 5) -> list[tuple[str, float]]:
-        """Probability of each Whisper language token for the first 30 s of audio."""
         if not isinstance(audio, np.ndarray):
             audio = load_audio(audio)
         feats = self.processor(

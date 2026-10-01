@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-"""Fetch N Kyrgyz clips from Google FLEURS (ky_kg) and write a TSV manifest.
-
-The audio archive is streamed and we stop reading once we have N clips, so only a few
-MB are downloaded instead of the whole split.
-
-    python scripts/fetch_fleurs.py --split dev -n 20 --out data/fleurs_ky
-"""
+"""Stream N Kyrgyz clips from Google FLEURS and write a TSV manifest."""
 
 from __future__ import annotations
 
@@ -28,10 +22,9 @@ def main() -> None:
 
     wav_dir = args.out / "wavs"
     wav_dir.mkdir(parents=True, exist_ok=True)
-    for old in wav_dir.glob("*.wav"):  # keep wavs/ in sync with the manifest
+    for old in wav_dir.glob("*.wav"):
         old.unlink()
 
-    # TSV columns: id, file_name, raw_transcription, normalized_transcription, ...
     tsv = urllib.request.urlopen(f"{BASE}/{args.split}.tsv").read().decode("utf-8")
     refs = {}
     for row in csv.reader(io.StringIO(tsv), delimiter="\t", quoting=csv.QUOTE_NONE):
@@ -40,7 +33,7 @@ def main() -> None:
 
     rows: list[tuple[str, str]] = []
     with urllib.request.urlopen(f"{BASE}/audio/{args.split}.tar.gz") as resp:
-        with tarfile.open(fileobj=resp, mode="r|gz") as tar:  # streaming mode
+        with tarfile.open(fileobj=resp, mode="r|gz") as tar:
             for member in tar:
                 name = Path(member.name).name
                 if not member.isfile() or name not in refs:

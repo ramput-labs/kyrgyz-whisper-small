@@ -3,12 +3,13 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kyrgyz-asr"
+name = "whisper-small"
 version = "0.1.0"
-description = "Kyrgyz speech recognition: CLI, Python API, evaluation and web demo on a Whisper-small Kyrgyz model"
+description = "Kyrgyz speech recognition on Whisper-small: CLI, Python API, evaluation and web demo"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
+authors = [{ name = "Ramput Labs" }]
 dependencies = [
     "torch>=2.2",
     "transformers>=4.56",
@@ -27,7 +28,7 @@ demo = ["gradio>=4"]
 dev = ["pytest>=8"]
 
 [project.scripts]
-kyasr = "kyrgyz_asr.cli:app"
+whisper-small = "whisper_small.cli:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]

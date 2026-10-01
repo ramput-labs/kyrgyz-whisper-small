@@ -1,5 +1,3 @@
-"""Audio I/O: load any file into 16 kHz mono float32, record from the microphone."""
-
 from __future__ import annotations
 
 import shutil
@@ -14,7 +12,6 @@ from .config import SAMPLE_RATE
 
 
 def _load_with_ffmpeg(path: Path, sr: int) -> np.ndarray:
-    """Fallback for containers libsndfile can't read (m4a, mp4, webm, ...)."""
     if shutil.which("ffmpeg") is None:
         raise RuntimeError(
             f"Cannot decode {path.suffix} with libsndfile and ffmpeg is not installed. "
@@ -29,7 +26,6 @@ def _load_with_ffmpeg(path: Path, sr: int) -> np.ndarray:
 
 
 def to_mono_16k(audio: np.ndarray, sr: int) -> np.ndarray:
-    """Downmix to mono and resample to 16 kHz."""
     audio = np.asarray(audio, dtype=np.float32)
     if audio.ndim == 2:
         audio = audio.mean(axis=1)
@@ -51,7 +47,6 @@ def load_audio(path: str | Path) -> np.ndarray:
 
 
 def record(seconds: float, device: int | str | None = None) -> np.ndarray:
-    """Record from the default microphone (requires the `mic` extra)."""
     try:
         import sounddevice as sd
     except ImportError as e:  # pragma: no cover
@@ -85,11 +80,9 @@ def split_on_silence(
     smooth_ms: int = 300,
     sr: int = SAMPLE_RATE,
 ) -> list[tuple[int, int]]:
-    """Cut long audio into <= ``max_seconds`` pieces at the quietest point of each window.
+    """Cut audio into <= max_seconds pieces at the quietest point of each window.
 
-    Whisper sees 30 s at a time. Cutting at pauses (instead of fixed windows with overlap)
-    means no word is split in half and no stitching of overlapping hypotheses is needed.
-    Returns ``(start_sample, end_sample)`` pairs covering the whole signal.
+    Cutting at pauses avoids split words and stitching overlapping chunks.
     """
     total = len(audio)
     max_len, min_len = int(max_seconds * sr), int(min_seconds * sr)
@@ -99,7 +92,7 @@ def split_on_silence(
     frame = sr * frame_ms // 1000
     db = _frame_db(audio, frame)
     k = max(1, smooth_ms // frame_ms)
-    smooth = np.convolve(db, np.ones(k) / k, mode="same")  # a pause is a run of quiet frames
+    smooth = np.convolve(db, np.ones(k) / k, mode="same")
 
     spans, start = [], 0
     while total - start > max_len:
@@ -112,11 +105,7 @@ def split_on_silence(
 
 
 def is_silent(audio: np.ndarray, peak_db: float = -60.0) -> bool:
-    """True only for (near) digital silence, where Whisper tends to hallucinate.
-
-    Deliberately not a loudness gate: real recordings of speech can peak around -40 dBFS and
-    Whisper's log-mel normalisation handles quiet input fine.
-    """
+    # Not a loudness gate: real speech can peak around -40 dBFS.
     if len(audio) == 0:
         return True
     return 20 * np.log10(float(np.abs(audio).max()) + 1e-12) < peak_db
